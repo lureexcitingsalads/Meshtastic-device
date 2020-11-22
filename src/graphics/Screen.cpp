@@ -152,6 +152,7 @@ static void drawFrameBluetooth(OLEDDisplay *display, OLEDDisplayUiState *state, 
 }
 
 /// Draw the last text message we received
+uint32_t lastMPID = 0;
 static void drawTextMessageFrame(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
 {
     displayedNodeNum = 0; // Not currently showing a node pane
@@ -176,6 +177,25 @@ static void drawTextMessageFrame(OLEDDisplay *display, OLEDDisplayUiState *state
     snprintf(tempBuf, sizeof(tempBuf), "         %s", mp.decoded.data.payload.bytes);
 
     display->drawStringMaxWidth(4 + x, 10 + y, SCREEN_WIDTH - (6 + x), tempBuf);
+
+    // Jm - This is a total hack!
+    // Don't merge this into the main code for fear of being kicked out of the club.
+    // Or else!
+
+    if (devicestate.has_rx_text_message) {
+        if (mp.id != lastMPID) {
+            lastMPID = mp.id;
+            // DEBUG_MSG("---------\n");
+            radioConfig.preferences.gps_update_interval = 1;
+            printf("--------- %f %f %f\n", gpsStatus->getLatitude() * 1e-7, gpsStatus->getLongitude() * 1e-7, mp.rx_snr);
+            //printf("--------- %f %f %f\n", gpsStatus->getLatitude() * 1e-7, gpsStatus->getLongitude() * 1e-7, clamp((int)((node->snr + 10) * 5), 0, 100));
+            
+            
+
+            // printf("--------- %f %f \n", gpsStatus->getLatitude() * 1e-7, gpsStatus->getLongitude() * 1e-7);
+            // DEBUG_MSG("---------\n");
+        }
+    }
 }
 
 /// Draw a series of fields in a column, wrapping to multiple colums if needed
